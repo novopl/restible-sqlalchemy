@@ -1,0 +1,37 @@
+pelconf_version: '1'
+
+src_dir: src
+src_path: src/restible_sqlalchemy
+build_dir: .build
+version_file: src/restible_sqlalchemy/__init__.py
+
+commands:
+  - peltak.commands.docs
+  - peltak.commands.git
+  - peltak.commands.lint
+  - peltak.commands.test
+  - peltak.commands.version
+  - peltak.extra.gitflow
+  - peltak.extra.pypi
+
+clean:
+  exclude:
+    - '.tox'
+    - 'env'
+
+
+lint:
+  paths:
+    - src/restible_sqlalchemy
+
+
+docs:
+  path: docs
+  reference:
+    - src/restible_sqlalchemy
+
+test:
+  types:
+    default:
+      paths:
+        - tests
