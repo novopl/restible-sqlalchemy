@@ -35,7 +35,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=('test', 'test.*')),
     install_requires=[
-        'restible~=0.11.0',
+        'restible~=0.11.1',
         'sqlalchemy>=1.1'
     ],
     classifiers=[

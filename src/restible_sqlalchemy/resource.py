@@ -10,9 +10,11 @@ from logging import getLogger
 # 3rd party imports
 from restible import util
 from restible.model import ModelResource
-from six import iteritems   # pylint: disable=wrong-import-order
 from serafin import Fieldspec
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+
+# local imports
+from .util import db_query_from_params
 
 
 L = getLogger(__name__)
@@ -70,7 +72,7 @@ class SqlAlchemyResource(ModelResource):
     def update_item(self, request, params, payload):
         del params      # Unused here
 
-        item = self.get_item(request)
+        item = self.item_for_request(request)
         if item is None:
             return None
 
@@ -105,36 +107,15 @@ class SqlAlchemyResource(ModelResource):
         :return google.appengine.ext.ndb.Query:
             The query with the given filters already applied.
         """
-        del payload     # Unused here
-
-        filters = [getattr(self.model, n) == v for n, v in iteritems(params)]
-        return self.get_queryset(request).filter(*filters).all()
+        del request, payload     # Unused here
+        return db_query_from_params(self.model, params).all()
 
     def get_item(self, request, params, payload):
         """ Get requested item. """
         del params, payload     # Unused here
         return self.item_for_request(request)
 
-    def get_queryset(self, request):
-        """ Extension point for one place to limit the data returned.
-
-        Both .query_items() and .get_item() use this function as the base
-        queryset. This means that if you need to restrict access to some db
-        entries, you can just overload this method.
-
-        :param request:
-            The request associated with the call. Not used by default, but can
-            be handy when overriding.
-        :return:
-            The SQLAlchemy resource.
-        """
-        del request     # Unused here
-
-        return self.model.query
-
     def item_for_request(self, request):
         """ Get requested item. """
-        pk = self.get_pk(request)
-        return self.get_queryset(request).filter(
-            self.model.id == pk
-        ).one_or_none()
+        pk = int(self.get_pk(request))
+        return self.model.query.filter(self.model.id == pk).one_or_none()
